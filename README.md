@@ -33,7 +33,7 @@ Nexus Helm repo.
 ## Usage
 
   * `helm nexus-push myrepo mychart-0.0.1.tgz`
-  * `helm nexus-push myrepo ./mychart
+  * `helm nexus-push myrepo ./mychart`
 
 Additional help available `helm nexus-push --help`
 
