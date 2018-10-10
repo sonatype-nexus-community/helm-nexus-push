@@ -17,7 +17,25 @@
 -->
 # Helm Nexus Repository Push
 
-TBD
+A Helm plugin that pushes a chart directory or packaged chart tgz to a specified
+Nexus Helm repo.
+
+## Installation
+
+  * `helm plugin install --version master https://github.com/sonatype-nexus-community/helm-nexus-push.git`
+  * `helm nexus-push --help`
+
+## Updates
+
+  * `cd $HELM_HOME/plugins/nexus-push`
+  * `git pull`
+
+## Usage
+
+  * `helm nexus-push myrepo mychart-0.0.1.tgz`
+  * `helm nexus-push myrepo ./mychart
+
+Additional help available `helm nexus-push --help`
 
 ## The Fine Print
 
