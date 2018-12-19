@@ -112,9 +112,9 @@ case "$2" in
                     read -s -p "Password: " PASSWORD
                     echo
                 fi
-                AUTH="$USERNAME:$PASSWORD"
             fi
         fi
+        AUTH="$USERNAME:$PASSWORD"
 
         if [[ -d "${CHART:-}" ]]; then
             CHART_PACKAGE="$(helm package "$CHART" | cut -d":" -f2 | tr -d '[:space:]')"
