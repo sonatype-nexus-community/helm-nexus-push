@@ -70,7 +70,7 @@ declare REPO=$1
 declare REPO_URL="$(helm repo list | grep "^$REPO" | awk '{print $2}')/"
 declare REPO_AUTH_FILE="$(helm home)/repository/auth.$REPO"
 
-if [[ -z "$REPO_URL" ]]; then
+if [[ -z "${REPO_URL:-}" ]]; then
     echo "Invalid repo specified!  Must specify one of these repos..."
     helm repo list
     echo "---"
@@ -84,10 +84,10 @@ declare CHART
 
 case "$2" in
     login)
-        if [[ -z "$USERNAME" ]]; then
+        if [[ -z "${USERNAME:-}" ]]; then
             read -p "Username: " USERNAME
         fi
-        if [[ -z "$PASSWORD" ]]; then
+        if [[ -z "${PASSWORD:-}" ]]; then
             read -s -p "Password: " PASSWORD
             echo
         fi
@@ -100,15 +100,15 @@ case "$2" in
         CMD=push
         CHART=$2
 
-        if [[ -z "$USERNAME" ]] || [[ -z "$PASSWORD" ]]; then
-            if [[ -f "$REPO_AUTH_FILE" ]]; then
+        if [[ -z "${USERNAME:-}" ]] || [[ -z "${PASSWORD:-}" ]]; then
+            if [[ -f "${REPO_AUTH_FILE:-}" ]]; then
                 echo "Using cached login creds..."
                 AUTH="$(cat $REPO_AUTH_FILE)"
             else
-                if [[ -z "$USERNAME" ]]; then
+                if [[ -z "${USERNAME:-}" ]]; then
                     read -p "Username: " USERNAME
                 fi
-                if [[ -z "$PASSWORD" ]]; then
+                if [[ -z "${PASSWORD:-}" ]]; then
                     read -s -p "Password: " PASSWORD
                     echo
                 fi
@@ -116,7 +116,7 @@ case "$2" in
             fi
         fi
 
-        if [[ -d "$CHART" ]]; then
+        if [[ -d "${CHART:-}" ]]; then
             CHART_PACKAGE="$(helm package "$CHART" | cut -d":" -f2 | tr -d '[:space:]')"
         else
             CHART_PACKAGE="$CHART"
