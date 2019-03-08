@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ueo pipefail
+set -eo pipefail
 
 usage() {
 cat << EOF
@@ -17,11 +17,13 @@ Usage:
 Flags:
   -u, --username string                 Username for authenticated repo (assumes anonymous access if unspecified)
   -p, --password string                 Password for authenticated repo (prompts if unspecified and -u specified)
+
+Username and Password for authenticated repo can be supplied using NEXUS_USERNAME and NEXUS_PASSWORD environment variables.
 EOF
 }
 
-declare USERNAME
-declare PASSWORD
+declare NEXUS_USERNAME
+declare NEXUS_PASSWORD
 
 declare -a POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]
@@ -39,14 +41,14 @@ do
                 exit 1
             fi
             shift
-            USERNAME=$1
+            NEXUS_USERNAME=$1
             ;;
         -p|--password)
             if [[ -n "${2:-}" ]]; then
                 shift
-                PASSWORD=$1
+                NEXUS_PASSWORD=$1
             else
-                PASSWORD=
+                NEXUS_PASSWORD=
             fi
             ;;
         *)
@@ -84,14 +86,14 @@ declare CHART
 
 case "$2" in
     login)
-        if [[ -z "$USERNAME" ]]; then
-            read -p "Username: " USERNAME
+        if [[ -z "${NEXUS_USERNAME:-}" ]]; then
+            read -p "Username: " NEXUS_USERNAME
         fi
-        if [[ -z "$PASSWORD" ]]; then
-            read -s -p "Password: " PASSWORD
+        if [[ -z "${NEXUS_PASSWORD:-}" ]]; then
+            read -s -p "Password: " NEXUS_PASSWORD
             echo
         fi
-        echo "$USERNAME:$PASSWORD" > "$REPO_AUTH_FILE"
+        echo "$NEXUS_USERNAME:$NEXUS_PASSWORD" > "$REPO_AUTH_FILE"
         ;;
     logout)
         rm -f "$REPO_AUTH_FILE"
@@ -100,19 +102,19 @@ case "$2" in
         CMD=push
         CHART=$2
 
-        if [[ -z "$USERNAME" ]] || [[ -z "$PASSWORD" ]]; then
+        if [[ -z "${NEXUS_USERNAME:-}" ]] || [[ -z "${NEXUS_PASSWORD:-}" ]]; then
             if [[ -f "$REPO_AUTH_FILE" ]]; then
                 echo "Using cached login creds..."
                 AUTH="$(cat $REPO_AUTH_FILE)"
             else
-                if [[ -z "$USERNAME" ]]; then
-                    read -p "Username: " USERNAME
+                if [[ -z "${NEXUS_USERNAME:-}" ]]; then
+                    read -p "Username: " NEXUS_USERNAME
                 fi
-                if [[ -z "$PASSWORD" ]]; then
-                    read -s -p "Password: " PASSWORD
+                if [[ -z "${NEXUS_PASSWORD:-}" ]]; then
+                    read -s -p "Password: " NEXUS_PASSWORD
                     echo
                 fi
-                AUTH="$USERNAME:$PASSWORD"
+                AUTH="$NEXUS_USERNAME:$NEXUS_PASSWORD"
             fi
         fi
 
