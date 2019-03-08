@@ -116,6 +116,8 @@ case "$2" in
                 fi
                 AUTH="$NEXUS_USERNAME:$NEXUS_PASSWORD"
             fi
+        else
+            AUTH="$NEXUS_USERNAME:$NEXUS_PASSWORD"
         fi
 
         if [[ -d "$CHART" ]]; then
