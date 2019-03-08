@@ -1,5 +1,5 @@
 name: "nexus-push"
-version: "0.0.1"
+version: "0.0.2"
 usage: "Push chart or packaged chart to a specified repo"
 description: |-
   Pushes a chart directory or packaged chart tgz to a specified repo,
