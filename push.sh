@@ -72,7 +72,7 @@ declare REPO=$1
 declare REPO_URL="$(helm repo list | grep "^$REPO" | awk '{print $2}')/"
 declare REPO_AUTH_FILE="$(helm home)/repository/auth.$REPO"
 
-if [[ -z "${REPO_URL:-}" ]]; then
+if [[ $REPO_URL == / ]]; then
     echo "Invalid repo specified!  Must specify one of these repos..."
     helm repo list
     echo "---"
