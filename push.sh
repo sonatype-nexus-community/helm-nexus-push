@@ -126,7 +126,14 @@ logout)
     fi
 
     echo "Pushing $CHART to repo $REPO_URL..."
-    curl -is -u "$AUTH" "$REPO_URL" --upload-file "$CHART_PACKAGE" | indent
+
+    status_code=$(curl -o curl-log.txt -is -u --write-out '%{http_code}\n' "$AUTH" "$REPO_URL" --upload-file "$CHART_PACKAGE")
+
+    if [[ "$status_code" -ne 200 ]]; then
+        cat curl-log.txt | indent
+        exit "$status_code"
+    fi
+
     echo "Done"
     ;;
 esac
