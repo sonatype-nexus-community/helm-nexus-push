@@ -22,7 +22,7 @@ Nexus Helm repo.
 
 ## Installation
 
-  * `helm plugin install --version master https://github.com/sonatype-nexus-community/helm-nexus-push.git`
+  * `helm plugin install --version master https://github.com/sleep-dragon/helm-nexus-push.git`
   * `helm nexus-push --help`
 
 ## Updates
