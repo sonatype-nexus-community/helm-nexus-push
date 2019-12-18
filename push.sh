@@ -121,6 +121,8 @@ case "$2" in
                 fi
                 AUTH="$USERNAME:$PASSWORD"
             fi
+	else
+		AUTH="$USERNAME:$PASSWORD"
         fi
 
         if [[ -d "$CHART" ]]; then
