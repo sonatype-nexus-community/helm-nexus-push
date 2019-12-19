@@ -66,7 +66,7 @@ fi
 
 indent() { sed 's/^/  /'; }
 
-declare HELM3_VERSION="helm --client --short version | grep "v3\.""
+declare HELM3_VERSION="$(helm --client --short version | grep "v3\.")"
 
 declare REPO=$1
 declare REPO_URL="$(helm repo list | grep "^$REPO" | awk '{print $2}')/"
