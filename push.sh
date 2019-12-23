@@ -66,9 +66,16 @@ fi
 
 indent() { sed 's/^/  /'; }
 
+declare HELM3_VERSION="$(helm version --client --short | grep "v3\.")"
+
 declare REPO=$1
 declare REPO_URL="$(helm repo list | grep "^$REPO" | awk '{print $2}')/"
+
+if [[ -n $HELM3_VERSION ]]; then
+declare REPO_AUTH_FILE="$HOME/.config/helm/auth.$REPO"
+else
 declare REPO_AUTH_FILE="$(helm home)/repository/auth.$REPO"
+fi
 
 if [[ -z "$REPO_URL" ]]; then
     echo "Invalid repo specified!  Must specify one of these repos..."
