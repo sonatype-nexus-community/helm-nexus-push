@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ueo pipefail
+set -eo pipefail
 
 usage() {
 cat << EOF
@@ -20,7 +20,7 @@ Flags:
 EOF
 }
 
-declare USERNAME
+declare REPO_USERNAME
 declare PASSWORD
 
 declare -a POSITIONAL_ARGS=()
@@ -39,7 +39,7 @@ do
                 exit 1
             fi
             shift
-            USERNAME=$1
+            REPO_USERNAME=$1
             ;;
         -p|--password)
             if [[ -n "${2:-}" ]]; then
@@ -91,14 +91,14 @@ declare CHART
 
 case "$2" in
     login)
-        if [[ -z "$USERNAME" ]]; then
-            read -p "Username: " USERNAME
+        if [[ -z "$REPO_USERNAME" ]]; then
+            read -p "Username: " REPO_USERNAME
         fi
         if [[ -z "$PASSWORD" ]]; then
             read -s -p "Password: " PASSWORD
             echo
         fi
-        echo "$USERNAME:$PASSWORD" > "$REPO_AUTH_FILE"
+        echo "$REPO_USERNAME:$PASSWORD" > "$REPO_AUTH_FILE"
         ;;
     logout)
         rm -f "$REPO_AUTH_FILE"
@@ -107,19 +107,19 @@ case "$2" in
         CMD=push
         CHART=$2
 
-        if [[ -z "$USERNAME" ]] || [[ -z "$PASSWORD" ]]; then
+        if [[ -z "$REPO_USERNAME" ]] || [[ -z "$PASSWORD" ]]; then
             if [[ -f "$REPO_AUTH_FILE" ]]; then
                 echo "Using cached login creds..."
                 AUTH="$(cat $REPO_AUTH_FILE)"
             else
-                if [[ -z "$USERNAME" ]]; then
-                    read -p "Username: " USERNAME
+                if [[ -z "$REPO_USERNAME" ]]; then
+                    read -p "Username: " REPO_USERNAME
                 fi
                 if [[ -z "$PASSWORD" ]]; then
                     read -s -p "Password: " PASSWORD
                     echo
                 fi
-                AUTH="$USERNAME:$PASSWORD"
+                AUTH="$REPO_USERNAME:$PASSWORD"
             fi
 	else
 		AUTH="$USERNAME:$PASSWORD"
