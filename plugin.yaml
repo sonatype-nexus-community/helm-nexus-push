@@ -16,5 +16,4 @@ platformCommand:
     arch: amd64
     command: "powershell $HELM_PLUGIN_DIR/push.ps1"
 useTunnel: false
-
 ignoreFlags: false
