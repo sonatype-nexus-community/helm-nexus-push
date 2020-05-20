@@ -4,7 +4,6 @@ $globalArgs = New-Object "System.Collections.ArrayList"
 $USERNAME
 $PASSWORD
 
-
 while ($args.Length -gt 0) {
     switch ($args[0]) {
         "-h" {}
