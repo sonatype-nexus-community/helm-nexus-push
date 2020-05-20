@@ -5,6 +5,15 @@ description: |-
   Pushes a chart directory or packaged chart tgz to a specified repo,
   either by named repo or raw URL.  It also supports basic authenticated repos.
   See `helm nexus-push --help` for usage.
-command: "$HELM_PLUGIN_DIR/push.sh"
+platformCommand:
+  - os: linux
+    arch: i386
+    command: "$HELM_PLUGIN_DIR/push.sh"
+  - os: linux
+    arch: amd64
+    command: "$HELM_PLUGIN_DIR/push.sh"
+  - os: windows
+    arch: amd64
+    command: "powershell $HELM_PLUGIN_DIR/push.ps1"
 useTunnel: false
 ignoreFlags: false
