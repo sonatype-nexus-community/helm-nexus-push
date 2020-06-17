@@ -20,8 +20,8 @@ Flags:
 EOF
 }
 
-declare USERNAME
-declare PASSWORD
+declare USERNAME=
+declare PASSWORD=
 
 declare -a POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]
