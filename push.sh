@@ -5,15 +5,12 @@ set -ueo pipefail
 usage() {
 cat << EOF
 Push Helm Chart to Nexus repository
-
 This plugin provides ability to push a Helm Chart directory or package to a
 remote Nexus Helm repository.
-
 Usage:
   helm nexus-push [repo] login [flags]        Setup login information for repo
   helm nexus-push [repo] logout [flags]       Remove login information for repo
   helm nexus-push [repo] [CHART] [flags]      Pushes chart to repo
-
 Flags:
   -u, --username string                 Username for authenticated repo (assumes anonymous access if unspecified)
   -p, --password string                 Password for authenticated repo (prompts if unspecified and -u specified)
@@ -66,9 +63,16 @@ fi
 
 indent() { sed 's/^/  /'; }
 
+declare HELM3_VERSION="$(helm version --client --short | grep "v3\.")"
+
 declare REPO=$1
 declare REPO_URL="$(helm repo list | grep "^$REPO" | awk '{print $2}')/"
+
+if [[ -n $HELM3_VERSION ]]; then
+declare REPO_AUTH_FILE="$HOME/.config/helm/auth.$REPO"
+else
 declare REPO_AUTH_FILE="$(helm home)/repository/auth.$REPO"
+fi
 
 if [[ -z "$REPO_URL" ]]; then
     echo "Invalid repo specified!  Must specify one of these repos..."
@@ -114,6 +118,8 @@ case "$2" in
                 fi
                 AUTH="$USERNAME:$PASSWORD"
             fi
+	else
+		AUTH="$USERNAME:$PASSWORD"
         fi
 
         if [[ -d "$CHART" ]]; then
@@ -123,7 +129,7 @@ case "$2" in
         fi
 
         echo "Pushing $CHART to repo $REPO_URL..."
-        curl -is -u "$(cat $REPO_AUTH_FILE)" "$REPO_URL" --upload-file "$CHART_PACKAGE" | indent
+        curl -is -u "$AUTH" "$REPO_URL" --upload-file "$CHART_PACKAGE" | indent
         echo "Done"
         ;;
 esac
