@@ -20,8 +20,8 @@ Flags:
 EOF
 }
 
-declare USERNAME
-declare PASSWORD
+declare USERNAME=""
+declare PASSWORD=""
 
 declare -a POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]
@@ -126,7 +126,7 @@ case "$2" in
         fi
 
         if [[ -d "$CHART" ]]; then
-            CHART_PACKAGE="$(helm package "$CHART" | cut -d":" -f2 | tr -d '[:space:]')"
+            CHART_PACKAGE="$(helm package "$CHART" | cut -d":" -f2 | xargs)"
         else
             CHART_PACKAGE="$CHART"
         fi
