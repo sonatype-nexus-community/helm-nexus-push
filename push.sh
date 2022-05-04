@@ -146,6 +146,7 @@ case "$2" in
 
         echo "Pushing $CHART to repo $REPO_URL..."
         curl -is -u "$AUTH" "$REPO_URL" --upload-file "$CHART_PACKAGE" | indent
+	rm -rf "$CHART_PACKAGE"
         echo "Done"
         ;;
 esac
