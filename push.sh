@@ -17,6 +17,19 @@ Usage:
 Flags:
   -u, --username string                 Username for authenticated repo (assumes anonymous access if unspecified)
   -p, --password string                 Password for authenticated repo (prompts if unspecified and -u specified)
+
+Examples:
+  To save credentials
+  helm nexus-push nexus login -u username -p password  
+  
+  To delete credentials
+  helm nexus-push nexus logout
+  
+  To push the chart using saved credentials
+  helm nexus-push nexus . 
+
+  To push the chart with credentials
+  helm nexus-push nexus .  -u username -p password  
 EOF
 }
 
@@ -138,3 +151,4 @@ case "$2" in
 esac
 
 exit 0
+
