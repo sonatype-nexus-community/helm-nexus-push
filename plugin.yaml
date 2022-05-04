@@ -1,5 +1,5 @@
 name: "nexus-push"
-version: "0.0.1"
+version: "0.0.2"
 usage: "Push chart or packaged chart to a specified repo"
 description: |-
   Pushes a chart directory or packaged chart tgz to a specified repo,
@@ -8,3 +8,13 @@ description: |-
 command: "$HELM_PLUGIN_DIR/push.sh"
 useTunnel: false
 ignoreFlags: false
+platformCommand:
+  - os: linux
+    arch: i386
+    command: "$HELM_PLUGIN_DIR/push.sh"
+  - os: linux
+    arch: amd64
+    command: "$HELM_PLUGIN_DIR/push.sh"
+  - os: windows
+    arch: amd64
+    command: "powershell $HELM_PLUGIN_DIR/push.ps1"
