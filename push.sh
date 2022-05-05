@@ -12,11 +12,13 @@ remote Nexus Helm repository.
 Usage:
   helm nexus-push [repo] login [flags]        Setup login information for repo
   helm nexus-push [repo] logout [flags]       Remove login information for repo
+  helm nexus-push [repo] delete [flags]       Remove chart from repo
   helm nexus-push [repo] [CHART] [flags]      Pushes chart to repo
 
 Flags:
   -u, --username string                 Username for authenticated repo (assumes anonymous access if unspecified)
   -p, --password string                 Password for authenticated repo (prompts if unspecified and -u specified)
+  -d, --filename string                 Artifact filename (used to delete a specific version in the repository)
 
 Examples:
   To save credentials
@@ -29,12 +31,19 @@ Examples:
   helm nexus-push nexus . 
 
   To push the chart with credentials
-  helm nexus-push nexus .  -u username -p password  
+  helm nexus-push nexus .  -u username -p password
+
+  To delete chart from repository
+  helm nexus-push nexus delete .
+
+  To delete chart from repository
+  helm nexus-push nexus delete -d artifact-1.0.0.tgz  
 EOF
 }
 
 declare USERNAME=""
 declare PASSWORD=""
+declare FILENAME=""
 
 declare -a POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]
@@ -62,6 +71,14 @@ do
                 PASSWORD=
             fi
             ;;
+        -d|--filename)
+            if [[ -n "${2:-}" ]]; then
+                shift
+                FILENAME=$1
+            else
+                FILENAME=
+            fi
+            ;;
         *)
             POSITIONAL_ARGS+=("$1")
             ;;
@@ -78,6 +95,26 @@ if [[ $# -lt 2 ]]; then
 fi
 
 indent() { sed 's/^/  /'; }
+
+getCredendials(){
+    if [[ -z "$USERNAME" ]] || [[ -z "$PASSWORD" ]]; then
+        if [[ -f "$REPO_AUTH_FILE" ]]; then
+            echo "Using cached login creds..."
+            AUTH="$(cat $REPO_AUTH_FILE)"
+        else
+            if [[ -z "$USERNAME" ]]; then
+                read -p "Username: " USERNAME
+            fi
+            if [[ -z "$PASSWORD" ]]; then
+                read -s -p "Password: " PASSWORD
+                echo
+            fi
+            AUTH="$USERNAME:$PASSWORD"
+        fi
+    else
+            AUTH="$USERNAME:$PASSWORD"
+    fi
+}
 
 declare HELM3_VERSION="$(helm version --client --short | grep "v3\.")"
 
@@ -116,40 +153,43 @@ case "$2" in
     logout)
         rm -f "$REPO_AUTH_FILE"
         ;;
+    delete)
+        # find credentials
+        getCredendials
+
+        CMD=delete
+
+        if [[ -z "$FILENAME" ]]; then
+            CHART=$3
+            CHART_PACKAGE="$(helm package "$CHART" | cut -d ":" -f2 | xargs)"
+        else
+            CHART_PACKAGE="$FILENAME"
+        fi
+        
+        # get package filename without path
+        CHART_PACKAGE=$(basename $CHART_PACKAGE)
+
+        echo "Deleting [$CHART_PACKAGE] from repo [$REPO_URL]..."
+        curl --request DELETE -is -u "$AUTH" "$REPO_URL$CHART_PACKAGE" | indent
+        echo "Done"
+        ;;
     *)
         CMD=push
         CHART=$2
 
-        if [[ -z "$USERNAME" ]] || [[ -z "$PASSWORD" ]]; then
-            if [[ -f "$REPO_AUTH_FILE" ]]; then
-                echo "Using cached login creds..."
-                AUTH="$(cat $REPO_AUTH_FILE)"
-            else
-                if [[ -z "$USERNAME" ]]; then
-                    read -p "Username: " USERNAME
-                fi
-                if [[ -z "$PASSWORD" ]]; then
-                    read -s -p "Password: " PASSWORD
-                    echo
-                fi
-                AUTH="$USERNAME:$PASSWORD"
-            fi
-	else
-		AUTH="$USERNAME:$PASSWORD"
-        fi
+        # find credentials
+        getCredendials
 
         if [[ -d "$CHART" ]]; then
-            CHART_PACKAGE="$(helm package "$CHART" | cut -d":" -f2 | xargs)"
+            CHART_PACKAGE="$(helm package "$CHART" | cut -d ":" -f2 | xargs)"
         else
             CHART_PACKAGE="$CHART"
         fi
 
-        echo "Pushing $CHART to repo $REPO_URL..."
+        echo "Pushing [$CHART] to repo [$REPO_URL]..."
         curl -is -u "$AUTH" "$REPO_URL" --upload-file "$CHART_PACKAGE" | indent
-	rm -rf "$CHART_PACKAGE"
         echo "Done"
         ;;
 esac
 
 exit 0
-
