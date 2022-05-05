@@ -24,8 +24,8 @@ Usage:
   helm nexus-push [repo] [CHART] [flags]      Pushes chart to repo
 
 Flags:
-  -u, --username string                 Username for authenticated repo (assumes anonymous access if unspecified)
-  -p, --password string                 Password for authenticated repo (prompts if unspecified and -u specified)
+  -u, -username string                 Username for authenticated repo (assumes anonymous access if unspecified)
+  -p, -password string                 Password for authenticated repo (prompts if unspecified and -u specified)
 
 Examples:
   To save credentials
