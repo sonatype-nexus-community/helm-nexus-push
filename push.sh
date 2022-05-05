@@ -171,6 +171,7 @@ case "$2" in
 
         echo "Deleting [$CHART_PACKAGE] from repo [$REPO_URL]..."
         curl --request DELETE -is -u "$AUTH" "$REPO_URL$CHART_PACKAGE" | indent
+        rm -rf "$CHART_PACKAGE"
         echo "Done"
         ;;
     *)
@@ -188,6 +189,7 @@ case "$2" in
 
         echo "Pushing [$CHART] to repo [$REPO_URL]..."
         curl -is -u "$AUTH" "$REPO_URL" --upload-file "$CHART_PACKAGE" | indent
+        rm -rf "$CHART_PACKAGE"
         echo "Done"
         ;;
 esac
