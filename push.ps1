@@ -8,6 +8,10 @@ param(
     [Alias("p")]
     [string]$password,
 
+    [Parameter()]
+    [Alias("d")]
+    [string]$filename,
+
     [Parameter(ValueFromRemainingArguments)]
     [string]$params
 )
@@ -21,11 +25,13 @@ This plugin provides ability to push a Helm Chart directory or package to a remo
 Usage:
   helm nexus-push [repo] login [flags]        Setup login information for repo
   helm nexus-push [repo] logout [flags]       Remove login information for repo
+  helm nexus-push [repo] delete [flags]       Remove chart from repo
   helm nexus-push [repo] [CHART] [flags]      Pushes chart to repo
 
 Flags:
-  -u, --username string                 Username for authenticated repo (assumes anonymous access if unspecified)
-  -p, --password string                 Password for authenticated repo (prompts if unspecified and -u specified)
+  -u, -username string                 Username for authenticated repo (assumes anonymous access if unspecified)
+  -p, -password string                 Password for authenticated repo (prompts if unspecified and -u specified)
+  -d, -filename string                 Artifact filename (used to delete a specific version in the repository)
 
 Examples:
   To save credentials
@@ -39,6 +45,12 @@ Examples:
 
   To push the chart with credentials
   helm nexus-push nexus .  -u username -p password
+
+  To delete chart from repository
+  helm nexus-push nexus delete 
+
+  To delete chart from repository
+  helm nexus-push nexus delete -d artifact-1.0.0.tgz
 "
 
 }
@@ -87,11 +99,16 @@ if ($COMMAND_OR_PATH -eq "login") {
         Remove-Item $REPO_AUTH_FILE
     }
 } else {
-    # Package the chart to a temporay folder
-    $HELM_PACKAGE_OUTPUT=$(helm package $COMMAND_OR_PATH -d $ENV:Temp)
+    if ($COMMAND_OR_PATH -eq "delete") {
+        # Find output file path
+        $HELM_PACKAGE_FILE=$filename
+    } else {
+        # Package the chart to a temporay folder
+        $HELM_PACKAGE_OUTPUT=$(helm package $COMMAND_OR_PATH -d $ENV:Temp)
 
-    # Find output file path
-    $HELM_PACKAGE_FILE=$($HELM_PACKAGE_OUTPUT.substring($HELM_PACKAGE_OUTPUT.IndexOf(":")+1).trim())
+        # Find output file path
+        $HELM_PACKAGE_FILE=$($HELM_PACKAGE_OUTPUT.substring($HELM_PACKAGE_OUTPUT.IndexOf(":")+1).trim())
+    }
     
     $CREDENTIALS = ""
     # find credentials
@@ -108,16 +125,34 @@ if ($COMMAND_OR_PATH -eq "login") {
     # Find the repository URL
     $REPO_URL = $REPO_JSON.url
 
-    # Push the chart
-    Write-Output "Pushing chart[$HELM_PACKAGE_FILE] to repository [$REPO_URL]"
-    if ([string]::IsNullOrEmpty($CREDENTIALS)) {
-        $response=$(curl.exe -is "$REPO_URL" --upload-file "$HELM_PACKAGE_FILE")
+    # ensure the URL ends with "/"
+    if(!$REPO_URL.EndsWith("/")){
+        $REPO_URL="$REPO_URL/"
+    }
+
+    # delete or push the chart
+    if ($COMMAND_OR_PATH -eq "delete") {
+        # Delete the chart
+        Write-Output "Deleting chart [$HELM_PACKAGE_FILE] from repository [$REPO_URL]"
+        if ([string]::IsNullOrEmpty($CREDENTIALS)) {
+            $response=$(curl.exe --request DELETE -is "$REPO_URL$HELM_PACKAGE_FILE")
+        } else {
+            $response=$(curl.exe --request DELETE -is -u "$CREDENTIALS" "${REPO_URL}{$HELM_PACKAGE_FILE}")
+        }
     } else {
-        $response=$(curl.exe -is -u "$CREDENTIALS" "$REPO_URL" --upload-file "$HELM_PACKAGE_FILE")
+        # Push the chart
+        Write-Output "Pushing chart [$HELM_PACKAGE_FILE] to repository [$REPO_URL]"
+        if ([string]::IsNullOrEmpty($CREDENTIALS)) {
+            $response=$(curl.exe -is "$REPO_URL" --upload-file "$HELM_PACKAGE_FILE")
+        } else {
+            $response=$(curl.exe -is -u "$CREDENTIALS" "$REPO_URL" --upload-file "$HELM_PACKAGE_FILE")
+        }
     }
 
     # delete chart package
-    Remove-Item $HELM_PACKAGE_FILE
+    if(test-path $HELM_PACKAGE_FILE){
+        Remove-Item $HELM_PACKAGE_FILE
+    }
 
     # check that the response was a "200 OK"
     if(!$($response|select-string -Pattern "200 OK")){
@@ -131,3 +166,5 @@ if ($COMMAND_OR_PATH -eq "login") {
     Write-Output "Done"
     exit(0)
 }
+
+
