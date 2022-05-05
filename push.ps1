@@ -47,7 +47,7 @@ Examples:
   helm nexus-push nexus .  -u username -p password
 
   To delete chart from repository
-  helm nexus-push nexus delete 
+  helm nexus-push nexus delete .
 
   To delete chart from repository
   helm nexus-push nexus delete -d artifact-1.0.0.tgz
@@ -77,6 +77,7 @@ if ($username -And [string]::IsNullOrEmpty($password)) {
 $PARAMS_ARRAY = $params.Split(" ")
 $REPO_NAME = $($PARAMS_ARRAY[0])
 $COMMAND_OR_PATH = $($PARAMS_ARRAY[1])
+$PATH = $($PARAMS_ARRAY[2])
 
 # Credential file
 $REPO_AUTH_FILE = $($env:HELM_DATA_HOME + "\auth." + $REPO_NAME)
@@ -100,8 +101,23 @@ if ($COMMAND_OR_PATH -eq "login") {
     }
 } else {
     if ($COMMAND_OR_PATH -eq "delete") {
-        # Find output file path
-        $HELM_PACKAGE_FILE=$filename
+        # path or filename are required
+        if([string]::IsNullOrEmpty($PATH) -And [string]::IsNullOrEmpty($filename)){
+            Usage
+            exit(4)
+        }
+        # check if we have a filename or a path
+        if ([string]::IsNullOrEmpty($PATH)) {
+            # Find output file path
+            $HELM_PACKAGE_FILE=$filename
+        } else {
+            # Package the chart to a temporay folder
+            $HELM_PACKAGE_OUTPUT=$(helm package $PATH -d $ENV:Temp)
+
+            # Find output filename
+            $HELM_PACKAGE_FILE=$($HELM_PACKAGE_OUTPUT.substring($HELM_PACKAGE_OUTPUT.IndexOf(":")+1).trim())
+            $HELM_PACKAGE_FILE=Split-Path $HELM_PACKAGE_FILE -Leaf
+        }
     } else {
         # Package the chart to a temporay folder
         $HELM_PACKAGE_OUTPUT=$(helm package $COMMAND_OR_PATH -d $ENV:Temp)
