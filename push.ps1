@@ -146,7 +146,9 @@ switch ($globalArgs[1]) {
             }
         }
         $REPO_URL += "/${CHART_PACKAGE}"
-        $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AUTH.split(":")[0],$AUTH.split(":")[1] | ConvertTo-SecureString
+        $username = $AUTH.split(":")[0]
+        $password = $AUTH.split(":")[1]
+        $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AUTH.split(":")[0],($AUTH.split(":")[1] | ConvertTo-SecureString)
         Write-Host "Pushing $CHART to repo $REPO_URL..."
         $bytes = [System.Text.Encoding]::ASCII.GetBytes($AUTH)
         $base64 = [System.Convert]::ToBase64String($bytes)
