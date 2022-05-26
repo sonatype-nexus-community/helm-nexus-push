@@ -101,9 +101,7 @@ switch ($globalArgs[1]) {
             $USERNAME = Read-Host -Prompt "Username"
         }
         if(!$PASSWORD) {
-            $PASSWORD = Read-Host -Prompt "Password" -AsSecureString 
-            $PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($PASSWORD))
-            Write-Host $PASSWORD
+            $PASSWORD = Read-Host -Prompt "Password" -AsSecureString | ConvertFrom-SecureString
         }
         echo ${USERNAME}:${PASSWORD} > $REPO_AUTH_FILE
         Break
@@ -130,8 +128,7 @@ switch ($globalArgs[1]) {
                         $USERNAME = Read-Host -Prompt "Username"
                     }
                     if(!$PASSWORD) {
-                        $PASSWORD = Read-Host -Prompt "Password" -AsSecureString 
-                        $PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($PASSWORD))
+                        $PASSWORD = Read-Host -Prompt "Password" -AsSecureString | ConvertFrom-SecureString
                     }
                     $AUTH = "${USERNAME}:${PASSWORD}"
                 }
@@ -149,15 +146,16 @@ switch ($globalArgs[1]) {
             }
         }
         $REPO_URL += "/${CHART_PACKAGE}"
+        $credentials = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AUTH.split(":")[0],$AUTH.split(":")[1] | ConvertTo-SecureString
         Write-Host "Pushing $CHART to repo $REPO_URL..."
         $bytes = [System.Text.Encoding]::ASCII.GetBytes($AUTH)
         $base64 = [System.Convert]::ToBase64String($bytes)
         $basicAuthValue = "Basic $base64"
         $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-        $headers.Add("Authorization", $basicAuthValue )
+        # $headers.Add("Authorization", $basicAuthValue )
         $headers.Add("Content-Type", "application/octet-stream")
         try {
-            $response = (Invoke-WebRequest $REPO_URL -Method 'PUT' -Headers $headers -InFile $CHART_PACKAGE)
+            $response = (Invoke-WebRequest $REPO_URL -Method 'PUT' -Headers $headers -Credential $credentials -InFile $CHART_PACKAGE)
             Write-Host "Pushed successfully!"
         } catch {
             Write-Host "StatusCode:" $_.Exception.Response.StatusCode.value__ 
