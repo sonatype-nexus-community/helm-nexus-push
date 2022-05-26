@@ -103,6 +103,7 @@ switch ($globalArgs[1]) {
         if(!$PASSWORD) {
             $PASSWORD = Read-Host -Prompt "Password" -AsSecureString 
             $PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($PASSWORD))
+            Write-Host $PASSWORD
         }
         echo ${USERNAME}:${PASSWORD} > $REPO_AUTH_FILE
         Break
