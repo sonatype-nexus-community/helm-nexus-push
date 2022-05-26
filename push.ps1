@@ -79,7 +79,7 @@ if ($globalArgs.Count -lt 2 ) {
 $HELM3_VERSION=(helm version --client --short | Select-String "v3\." | %{$_.Line.Trim()})
 
 $REPO=$globalArgs[0]
-$REPO_URL=(helm repo list | Select-String $REPO | %{ [regex]::split($_.Line," +")[1].trim(); })
+$REPO_URL=(helm repo list | Select-String $REPO | %{ [regex]::split($_.Line,"\s+")[1].trim(); })
 
 if ($HELM3_VERSION) {
     $REPO_AUTH_FILE="$env:APPDATA\helm\auth.$REPO"
