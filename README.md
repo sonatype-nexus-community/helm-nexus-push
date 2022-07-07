@@ -16,6 +16,9 @@
 
 -->
 
+This repo is a fork of `` `` because there repository is not maintained for few years.  
+
+
 # Helm Nexus Repository Push
 
 A Helm plugin that pushes a chart directory or packaged chart tgz to a specified
@@ -23,7 +26,7 @@ Nexus Helm repo.
 
 ## Installation
 
-  * `helm plugin install --version master https://github.com/sonatype-nexus-community/helm-nexus-push.git`
+  * `helm plugin install --version master https://github.com/survivant/helm-nexus-push.git`
   * `helm nexus-push --help`
 
 ## Updates
