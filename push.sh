@@ -17,11 +17,24 @@ Usage:
 Flags:
   -u, --username string                 Username for authenticated repo (assumes anonymous access if unspecified)
   -p, --password string                 Password for authenticated repo (prompts if unspecified and -u specified)
+
+Examples:
+  To save credentials
+  helm nexus-push nexus login -u username -p password  
+  
+  To delete credentials
+  helm nexus-push nexus logout
+  
+  To push the chart using saved credentials
+  helm nexus-push nexus . 
+
+  To push the chart with credentials
+  helm nexus-push nexus .  -u username -p password  
 EOF
 }
 
-declare USERNAME
-declare PASSWORD
+declare USERNAME=""
+declare PASSWORD=""
 
 declare -a POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]
@@ -126,15 +139,17 @@ case "$2" in
         fi
 
         if [[ -d "$CHART" ]]; then
-            CHART_PACKAGE="$(helm package "$CHART" | cut -d":" -f2 | tr -d '[:space:]')"
+            CHART_PACKAGE="$(helm package "$CHART" | cut -d":" -f2 | xargs)"
         else
             CHART_PACKAGE="$CHART"
         fi
 
         echo "Pushing $CHART to repo $REPO_URL..."
         curl -is -u "$AUTH" "$REPO_URL" --upload-file "$CHART_PACKAGE" | indent
+	rm -rf "$CHART_PACKAGE"
         echo "Done"
         ;;
 esac
 
 exit 0
+

@@ -15,6 +15,10 @@
  limitations under the License.
 
 -->
+
+This is a Fork of the project [helm-nexus-push](https://github.com/sonatype-nexus-community/helm-nexus-push).  This version included fixes for the unix script and **Windows** support was added. 
+
+
 # Helm Nexus Repository Push
 
 A Helm plugin that pushes a chart directory or packaged chart tgz to a specified
@@ -22,7 +26,7 @@ Nexus Helm repo.
 
 ## Installation
 
-  * `helm plugin install --version master https://github.com/sonatype-nexus-community/helm-nexus-push.git`
+  * `helm plugin install --version master https://github.com/survivant/helm-nexus-push.git`
   * `helm nexus-push --help`
 
 ## Updates
