@@ -16,7 +16,7 @@
 
 -->
 
-This repo is a fork of `` `` because there repository is not maintained for few years.  
+This is a Fork of the project [helm-nexus-push](https://github.com/sonatype-nexus-community/helm-nexus-push).  This version included fixes for the unix script and **Windows** support was added. 
 
 
 # Helm Nexus Repository Push
